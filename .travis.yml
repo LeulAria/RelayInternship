@@ -2,7 +2,8 @@ language: node_js
 node_js: 
   - "8"
 script:
-  - cd functions npm install
+  - cd functions
+  - npm install
   - echo "installing dependencys..."
 install:
   - npm install -g firebase-tools
