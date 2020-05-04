@@ -1,8 +1,34 @@
-const functions = require('firebase-functions');
+const functions = require("firebase-functions")
+const firebase = require("firebase")
+const express = require("express")
+const app = express()
+const fbconfig = require("./utils/FBConfig")
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-exports.helloWorld = functions.https.onRequest((request, response) => {
- response.send(`<h1 style="position:absolute;top:25%;left:50%;transform:translate(-50%,-50%);font-size:8vw;letter-spacing: 1vw;color:#444;font-weight: 200;font-family: monospace;"><small>Relay-Internships API</small></h1>`);
-});
+firebase.initializeApp(fbconfig)
+
+app.get("/", (req, res) => {
+  res.send(
+    `<h1 style="font-size:6vw;text-align:center;font-family:monospace;padding:6vw;
+    box-shadow:0 0 10px 4px rgba(0,0,0,0.2);border-radius:2vw;margin:10%;">/RelayInternships API<h1>`
+  );
+})
+
+// AUTHENTICATIONS
+// Signing into application
+app.use("/signup", require("./routes/api/auth/signup"))
+// Loging into application
+app.use("/login", require("./routes/api/auth/login"))
+
+// POSTS
+// Internship posts
+app.use("/posts", require('./routes/api/posts/post_internship'))
+
+// USER HANDLERS
+app.use('/user', require('./routes/api/handlers/user'))
+
+// ENTERPRICE HANDLERS
+app.use('/enterprice', require('./routes/api/handlers/enterprice'))
+
+
+
+exports.api = functions.region("europe-west1").https.onRequest(app);
