@@ -1,9 +1,11 @@
 const functions = require("firebase-functions")
 const firebase = require("firebase")
 const express = require("express")
-const app = express()
-const fbconfig = require("./utils/FBConfig")
+const app = express();
 
+const { db } = require('./utils/admin');
+
+const fbconfig = require("./utils/FBConfig")
 firebase.initializeApp(fbconfig)
 
 app.get("/", (req, res) => {
@@ -13,6 +15,8 @@ app.get("/", (req, res) => {
   );
 })
 
+
+
 // AUTHENTICATIONS
 // Signing into application
 app.use("/signup", require("./routes/api/auth/signup"))
@@ -21,14 +25,12 @@ app.use("/login", require("./routes/api/auth/login"))
 
 // POSTS
 // Internship posts
-app.use("/posts", require('./routes/api/posts/post_internship'))
+app.use("/posts", require('./routes/api/posts/posts'))
 
 // USER HANDLERS
 app.use('/user', require('./routes/api/handlers/user'))
 
 // ENTERPRICE HANDLERS
 app.use('/enterprice', require('./routes/api/handlers/enterprice'))
-
-
 
 exports.api = functions.region("europe-west1").https.onRequest(app);

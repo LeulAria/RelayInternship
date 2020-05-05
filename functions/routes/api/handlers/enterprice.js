@@ -24,6 +24,7 @@ router.delete('/:eid/delete_accout', (req, res) => {
 router.get('/internship/:internship_id/get_applied_users', (req, res) => {
   res.json({ msg: `here return ${req.params.id} internship and users applide to this specifi position` });
 })
+
 router.post('/internship/:internship_id/accept_user/:uid', (req, res) => {
   res.json({ msg: `accepting ${req.params.uid} for position ${req.params.internship_id}internship` });
 })

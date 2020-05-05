@@ -1,16 +1,25 @@
+const firebase = require('firebase');
 const express = require('express');
-const routes = express.Router();
+const router = express.Router();
 
-routes.get('/', (req, res) => {
+router.get('/', (req, res) => {
   res.send('auth login api...')
 })
 
-routes.post('/login_user', (req, res) => {
-  res.status(200).json({ msg: 'logged in as user', info: req.body });
+router.post('/', (req, res) => {
+  const loginData = {
+    email: req.body.email,
+    password: req.body.password
+  }
+
+  firebase.auth()
+  .signInWithEmailAndPassword(loginData.email, loginData.password)
+  .then(credentials => credentials.user.getIdToken())
+  .then(token => res.json({ token }))
+  .catch((err) => {
+    console.log(err)
+    res.status(400).json(err);
+  });
 })
 
-routes.post('/login_enterprice', (req, res) => {
-  res.status(200).json({ msg: 'logged in as enterprice', info: req.body });
-})
-
-module.exports = routes;
+module.exports = router;
