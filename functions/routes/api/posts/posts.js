@@ -3,12 +3,28 @@ const router = express.Router();
 const { db } = require('../../../utils/admin');
 const uuid = require("uuid");
 
+
 router.get('/', (req, res) => {
   res.send('posts api').end();
 });
 
+
 // internship posts CRUD
 // get all posted internships
+/**
+ * @swagger
+ * /posts/internships:
+ *  get:
+ *    tags:
+ *      - Internships
+ *    description: get all internships data
+ *    responses: 
+ *      '200':
+ *        description: return list of internships
+ *        content:
+ *          schema:
+ *            $ref: '#/components/schemas/Internship'
+ */
 router.get('/internships', (req, res) => {
   db.collection('internships').get()
   .then(snapshots => {
@@ -18,12 +34,53 @@ router.get('/internships', (req, res) => {
     })
     return res.json(internships);
   }).catch(err => {
-    console.error('pppppp:   ', err);
     res.json(err);
   })
 });
 
+
 // get only one internship
+
+/**
+* @swagger
+* /posts/internship/{postedInternshipId}:
+*   get:
+*     tags:
+*       - Internships
+*     summary: Get one a single internshps post
+*     description: get a single data of internshps
+*     parameters:
+*       - name: postedInternshipId
+*         in: path
+*         required: true
+*         description: the id to query an internship post
+*         schema:
+*          type: string 
+*     responses: 
+*       '200':
+*         description: Return a JSON object with the internshps datas
+*         content:
+*           application/json:
+*             schema:
+*               type: object 
+*
+* 
+*   delete:
+*    tags:
+*      - Internships
+*    summary: Delete Internship
+*    description: deleting an existing internshp post as an enterprice
+*    parameters:
+*      - name: postedInternshipId
+*        in: path
+*        required: true
+*        schema: 
+*          type: string
+*    responses:
+*      '200':
+*        description: internship post delereted successfully!
+*
+*/
 router.get('/internship/:id', (req, res) => {
   db.doc(`/internships/${req.params.id}`).get()
   .then(snapshot => {
@@ -38,6 +95,30 @@ router.get('/internship/:id', (req, res) => {
   })
 });
 
+
+/**
+ * @swagger
+ * /posts/internship/:
+ *   post:
+ *     tags:
+ *       - Internships
+ *     summary: Post a new Internship
+ *     description: post a new internship position as an enterprice
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: 
+ *             type: object
+ *             properties:
+ *               title: 
+ *                 type: string
+ *               content: 
+ *                 type: string
+ *     responses:
+ *       '201':
+ *         description: Post created successfully
+ */
 // create a post internsip
 router.post('/internship', (req, res) => {
   const newInternshipPost = {
@@ -67,6 +148,8 @@ router.put('/internship/:id', (req, res) => {
   })
   res.status(200).json({ msg: `internship ${req.params.id} post updated successfully!`, info: req.body });
 });
+
+
 
 // delete a posted internship
 router.delete('/internship/:id', (req, res) => {

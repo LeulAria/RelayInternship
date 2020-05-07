@@ -3,11 +3,41 @@ const { admin, db } = require('../../../utils/admin');
 const express = require('express')
 const router = express.Router()
 
+
 router.get('/', (req, res) => {
   res.send('auth signup api...');
 });
 
 
+/**
+*@swagger 
+* /signup/signup_user:
+*  post:
+*    tags: 
+*      - Authentication
+*    summary: Signup as user
+*    description: signing up a new user to the platform
+*    requestBody:
+*      required: true
+*      content:
+*        application/json:
+*          schema:
+*            type: object
+*            properties:
+*              email:
+*                type: string
+*                example: jhon@yahoo.com
+*              password:
+*                type: string
+*              handle:
+*                type: string
+*                example: jhon123
+*    responses: 
+*      "201":
+*        description: Return Token
+*      "400":
+*        description: bad request
+*/
 router.post('/signup_user', (req, res) => {
   const newUser = {
     email: req.body.email,
@@ -42,6 +72,38 @@ router.post('/signup_user', (req, res) => {
   });
 });
 
+
+
+
+/**
+ *@swagger
+ * /signup/signup_enterprice:
+ *  post:
+ *    tags:
+ *      - Authentication
+ *    summary: Signup as enterprice
+ *    description: singin up as a new enterprice to the platform
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema: 
+ *            type: object
+ *            properties:
+ *              email:
+ *                type: string
+ *                example: apple@apple.inc
+ *              password:
+ *                type: string
+ *              handle: 
+ *                type: string
+ *                example: apple
+ *    responses:
+ *      '201':
+ *        description: Return token
+ *      '400':
+ *        description: bad request
+ */
 router.post('/signup_enterprice', (req, res) => {
   const newEnterprice = {
     email: req.body.email,
