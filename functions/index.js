@@ -3,6 +3,8 @@ const firebase = require("firebase")
 const express = require("express")
 const app = express();
 
+// const { AuthUser, AuthEnterprice } = require('./utils/authGuard');
+
 const { db } = require('./utils/admin');
 
 const fbconfig = require("./utils/FBConfig")
@@ -44,33 +46,17 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, { explorer: true 
  *  - name: Internships
  *    description: internship posts related routes
  */
-
- /**
- * @swagger
- * components:
- *  schemas:
- *    User:
- *      properties:
- *        email:
- *          type: string
- *        password:
- *          type: string
- *        handle:
- *          type: string
- *    Internship:
- *      properties:
- *        title:
- *          type: string
- *        content:
- *          type: string
- */
-
-
 app.get("/", (req, res) => {
   res.send(
     `<h1 style="font-size:6vw;text-align:center;font-family:monospace;padding:6vw;
     box-shadow:0 0 10px 4px rgba(0,0,0,0.2);border-radius:2vw;margin:10%;">/RelayInternships API<p>/doc   to see the documentation</p><h1>`
   );
+})
+
+app.get("/g", /*AuthUserAuthEnterprice,*/ (req, res) => {
+  console.log('some sheet here are things... ', req.user);
+  console.log('handle:    ', req.handle);
+  res.send('hugo...');
 })
 
 
