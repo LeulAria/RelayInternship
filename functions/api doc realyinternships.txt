@@ -1,0 +1,248 @@
+All Routes:
+  https://europe-west1-relayinternships.cloudfunctions.net/api
+  https://europe-west1-relayinternships.cloudfunctions.net/api/signup/signup_user
+  https://europe-west1-relayinternships.cloudfunctions.net/api/signup/signup_enterprise
+  https://europe-west1-relayinternships.cloudfunctions.net/api/login
+  https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internships
+  https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/:id
+  https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship
+  https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/:id
+  https://europe-west1-relayinternships.cloudfunctions.net/api/posts//internship/:id
+  https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/:id/applied_users 
+  https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/:id/like
+  https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/
+  https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/:internship_id/apply
+  https://europe-west1-relayinternships.cloudfunctions.net/api/user
+  https://europe-west1-relayinternships.cloudfunctions.net/api/user/user_id  (eg: @jhon78)
+  https://europe-west1-relayinternships.cloudfunctions.net/api/user/:uid/deleteAccout
+  https://europe-west1-relayinternships.cloudfunctions.net/api/user/:uid/updateInfo
+  https://europe-west1-relayinternships.cloudfunctions.net/api/enterprice/:eid
+  https://europe-west1-relayinternships.cloudfunctions.net/api/enterprice/:eid/update_info
+  https://europe-west1-relayinternships.cloudfunctions.net/api/enterprice/:eid/update_avatar
+  https://europe-west1-relayinternships.cloudfunctions.net/api/enterprice/:eid/delete_accout
+  https://europe-west1-relayinternships.cloudfunctions.net/api/enterprice/internship/:internship_id/accept_user/:uid'
+
+
+Base URL:
+  https://europe-west1-relayinternships.cloudfunctions.net/api
+
+Authentication Routes:
+--------------------------------------------------------------------------------
+  request URL for Signup User:
+  POST:
+  https://europe-west1-relayinternships.cloudfunctions.net/api/signup/signup_user
+    :request_body
+      {
+        firstname: string,
+        lastname: string,
+        email: string,
+        password: string,
+        confirmPassword: string,
+        handle: string(eg: '#jack') note: it's used for username start with #,
+        gender: (Male, Femal, Other),
+        dob: date(eg: 03-01-1999),
+        eduction: (HighSchool, Priparatory, College, BSc, MSc),
+        major: string(eg: In ComputerScince),
+        nationality: string(eg: Ethipian),
+        address: string(eg: Piazza AddisAbaba, Ethipia),
+        current_work: string,
+        experince: number(eg: 0, 1) in years..,
+        bio: string("single line description bio 255words"),
+      }
+
+    :return_example
+      200:
+        {
+          "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImY1YzlhZWJlMjM0ZGE2MDE2YmQ3Yjk0OTE2OGI4Y2Q1YjRlYzllZWIiLCJ0eXAiOiJKV1QifQ.eyJ1c2VyVHlwZSI6InVzZXIiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vcmVsYXlpbnRlcm5zaGlwcyIsImF1ZCI6InJlbGF5aW50ZXJuc2hpcHMiLCJhdXRoX3RpbWUiOjE1ODk3OTE0MTIsInVzZXJfaWQiOiJrNTFCRHhwSzRIZ2x0dldvWlRBUW5IdFRUSHkxIiwic3ViIjoiazUxQkR4cEs0SGdsdHZXb1pUQVFuSHRUVEh5MSIsImlhdCI6MTU4OTc5MTQxMiwiZXhwIjoxNTg5Nzk1MDEyLCJlbWFpbCI6Impob25AZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImpob25AZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.m5cYAX5Ecrru1UeJ2dkMsTlVZs95CscGwXqxvEvF2kcfXONlVow_SZMIPfhx9YDLu-y9dB-9i28UtHzfxjyCLck747iLmv81nwiu24AbgEsilBBHRcmWBsj2G1D6VfWBRx7ik0NPpDJma_3RZkZ5FEGACbnO_QIRO9eL-hDZzHNyGcX07webU1zXNVhIn9kBYZ1waMgangcMjbHcwOMt8EuRDhU8NK1ecGia5-bsvR797C7YkNnGFvWKLZArHqTVoNPW3gSrggm45tXS9hHoksDOQ-ZzB0XDigVj8ywq_xVypkUhN-Dy-r0TNA1v-mjv_2hXy4UME_sJ-c2-4P_l_g"
+        }
+
+
+
+  --------------------------------------------------------------------------------
+    request URL for Signup Enterprice:
+    POST:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/signup/signup_enterprise
+      :request_body
+        {
+          enterprise_name: string,
+          email: string,
+          password: string,
+          handle: string(eg: '@apple') note: useed for enterprice username start with @,
+          enterprise_type: (Startup, Company, Interprice, LimitedCompany, PrivateCompany,... things like that),
+          address: string(eg: Piazza AddisAbaba, Ethipia),
+          social_link: array([ "@apple_telegram, www.tweeter.com/apple", ... ]),
+          enterprise_size: enum(Small, Medium, Large),
+          website: string(eg: www.apple.inc.com),
+          enterprise_startedDate: date(eg: 03-01-1982) note: the founded date of the company,
+          description: string("single line description bio 255words"),
+        }
+
+      :return_example
+        200:
+          {
+            "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImY1YzlhZWJlMjM0ZGE2MDE2YmQ3Yjk0OTE2OGI4Y2Q1YjRlYzllZWIiLCJ0eXAiOiJKV1QifQ.eyJ1c2VyVHlwZSI6InVzZXIiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vcmVsYXlpbnRlcm5zaGlwcyIsImF1ZCI6InJlbGF5aW50ZXJuc2hpcHMiLCJhdXRoX3RpbWUiOjE1ODk3OTE0MTIsInVzZXJfaWQiOiJrNTFCRHhwSzRIZ2x0dldvWlRBUW5IdFRUSHkxIiwic3ViIjoiazUxQkR4cEs0SGdsdHZXb1pUQVFuSHRUVEh5MSIsImlhdCI6MTU4OTc5MTQxMiwiZXhwIjoxNTg5Nzk1MDEyLCJlbWFpbCI6Impob25AZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImpob25AZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.m5cYAX5Ecrru1UeJ2dkMsTlVZs95CscGwXqxvEvF2kcfXONlVow_SZMIPfhx9YDLu-y9dB-9i28UtHzfxjyCLck747iLmv81nwiu24AbgEsilBBHRcmWBsj2G1D6VfWBRx7ik0NPpDJma_3RZkZ5FEGACbnO_QIRO9eL-hDZzHNyGcX07webU1zXNVhIn9kBYZ1waMgangcMjbHcwOMt8EuRDhU8NK1ecGia5-bsvR797C7YkNnGFvWKLZArHqTVoNPW3gSrggm45tXS9hHoksDOQ-ZzB0XDigVj8ywq_xVypkUhN-Dy-r0TNA1v-mjv_2hXy4UME_sJ-c2-4P_l_g"
+          }
+
+
+  --------------------------------------------------------------------------------
+    request URL for Login:
+    POST:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/login
+      :request_body
+        {
+          email: string,
+          password: string
+        }
+
+      :return_example
+        200:
+          {
+            "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImY1YzlhZWJlMjM0ZGE2MDE2YmQ3Yjk0OTE2OGI4Y2Q1YjRlYzllZWIiLCJ0eXAiOiJKV1QifQ.eyJ1c2VyVHlwZSI6InVzZXIiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vcmVsYXlpbnRlcm5zaGlwcyIsImF1ZCI6InJlbGF5aW50ZXJuc2hpcHMiLCJhdXRoX3RpbWUiOjE1ODk3OTE0MTIsInVzZXJfaWQiOiJrNTFCRHhwSzRIZ2x0dldvWlRBUW5IdFRUSHkxIiwic3ViIjoiazUxQkR4cEs0SGdsdHZXb1pUQVFuSHRUVEh5MSIsImlhdCI6MTU4OTc5MTQxMiwiZXhwIjoxNTg5Nzk1MDEyLCJlbWFpbCI6Impob25AZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImpob25AZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.m5cYAX5Ecrru1UeJ2dkMsTlVZs95CscGwXqxvEvF2kcfXONlVow_SZMIPfhx9YDLu-y9dB-9i28UtHzfxjyCLck747iLmv81nwiu24AbgEsilBBHRcmWBsj2G1D6VfWBRx7ik0NPpDJma_3RZkZ5FEGACbnO_QIRO9eL-hDZzHNyGcX07webU1zXNVhIn9kBYZ1waMgangcMjbHcwOMt8EuRDhU8NK1ecGia5-bsvR797C7YkNnGFvWKLZArHqTVoNPW3gSrggm45tXS9hHoksDOQ-ZzB0XDigVj8ywq_xVypkUhN-Dy-r0TNA1v-mjv_2hXy4UME_sJ-c2-4P_l_g"
+          }
+
+
+
+Internships Post:
+  --------------------------------------------------------------------------------
+    request URL for Getting All Internships:
+    GET:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internships
+      :return_example
+        200:
+          [ { internships data}, {}, {}... ]
+
+  --------------------------------------------------------------------------------
+    request URL for Getting Single Internships:
+    GET:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/:id
+      :return_example
+        200:
+          { Internship Data }
+
+
+  --------------------------------------------------------------------------------
+    request URL for Creating Internships:
+    POST:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship
+      :request_body
+        {
+          title: string,
+          type: enum(PAID | VOLENTEER | OTHER),
+          field_major: string(eg: softwareengeneer) note: the required field in the job,
+          duration: date(eg: 3months) note: the internship duration on which the user works,
+          location: string(eg: Piazza AddisAbaba, Ethipia),
+          number_of_candidates: number(eg: 4) note: the number of users that can be accepted,
+          status: enum(OPEN | CLOSED) note: all in capital,
+          description: string/text('description of the post any length'),
+          salary: number,
+          expiredation: date,
+        }
+
+      :return_example
+        200:
+          { msg: 'internship post created successfully', { the_posted_doc } }
+
+  --------------------------------------------------------------------------------
+    request URL for Updating Single Internships:
+    PUT:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/:id
+      :request_body
+        {
+         ...the updatable data
+        }
+
+      :return_example
+        200:
+          { message: 'document updated successfully!', doc }
+
+  --------------------------------------------------------------------------------
+    request URL for Delete Single Internships:
+    DELETE:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/posts//internship/:id
+      :request_body
+        {
+          email: string,
+          password: string
+        }
+
+      :return_example
+        200:
+          {}
+
+  --------------------------------------------------------------------------------
+    request URL for Getting Applied Users for Internship:
+    GET:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/:id/applied_users
+      note: in the path  :id  is the internship id
+      :return_example
+        200:
+          [ applied_users ]
+          
+
+
+  USERS ACTION:
+  --------------------------------------------------------------------------------
+    request URL for Getting Applied Users for Internship:
+    POST:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/:id/like
+      note: in the path  :id  is the internship id
+      :return_example
+        200:
+          { msg: 'Likes Sucessfully...' }
+          
+  --------------------------------------------------------------------------------
+    request URL for Getting All Internships:
+    POST:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/:internship_id/comment
+
+      :return_example
+        200:
+          {}
+
+  --------------------------------------------------------------------------------
+    request URL for Getting All Internships:
+    POST:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/posts/internship/:internship_id/apply
+      :request_body
+        nothing...
+      :return_example
+        200:
+          {}
+
+
+
+
+
+
+
+
+
+User Routes: 
+  --------------------------------------------------------------------------------
+    request URL for Getting Users:
+    GET:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/user
+      :return_example
+        200:
+          [ user_info }
+    request URL for Getting Users:
+    GET:
+    https://europe-west1-relayinternships.cloudfunctions.net/api/user/user_id  (eg: @jhon78)
+      :return_example
+        200:
+          { user_info }
+
+    https://europe-west1-relayinternships.cloudfunctions.net/api/user/:uid/deleteAccout
+    indevelopment
+    https://europe-west1-relayinternships.cloudfunctions.net/api/user/:uid/updateInfo
+    indevelopment
+
+
+Enterprice routes:
+    note: indevelopment...
+
+    https://europe-west1-relayinternships.cloudfunctions.net/api/enterprice/:eid
+    https://europe-west1-relayinternships.cloudfunctions.net/api/enterprice/:eid/update_info
+    https://europe-west1-relayinternships.cloudfunctions.net/api/enterprice/:eid/update_avatar
+    https://europe-west1-relayinternships.cloudfunctions.net/api/enterprice/:eid/delete_accout
+    https://europe-west1-relayinternships.cloudfunctions.net/api/enterprice/internship/:internship_id/accept_user/:uid'

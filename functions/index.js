@@ -1,9 +1,8 @@
 const functions = require("firebase-functions")
 const firebase = require("firebase")
 const express = require("express")
+const cors = require('cors')({origin: true});
 const app = express();
-
-// const { AuthUser, AuthEnterprice } = require('./utils/authGuard');
 
 const { db } = require('./utils/admin');
 
@@ -35,6 +34,7 @@ const swaggerOptions = {
   apis: ["index.js", "./routes/api/posts/*.js", "./routes/api/handlers/*.js", "./routes/api/auth/*.js"]
 };
 
+app.use(cors);
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, { explorer: true }));
 
@@ -53,13 +53,6 @@ app.get("/", (req, res) => {
   );
 })
 
-app.get("/g", /*AuthUserAuthEnterprice,*/ (req, res) => {
-  console.log('some sheet here are things... ', req.user);
-  console.log('handle:    ', req.handle);
-  res.send('hugo...');
-})
-
-
 // AUTHENTICATIONS
 // Signing into application
 app.use("/signup", require("./routes/api/auth/signup"))
@@ -71,10 +64,8 @@ app.use("/login", require("./routes/api/auth/login"))
 // Internship posts
 app.use("/posts", require('./routes/api/posts/posts'))
 
-
 // USER HANDLERS
 app.use('/user', require('./routes/api/handlers/user'))
-
 
 // ENTERPRICE HANDLERS
 app.use('/enterprice', require('./routes/api/handlers/enterprice'))

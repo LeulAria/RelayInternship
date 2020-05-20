@@ -66,6 +66,9 @@ router.post('/internship', AuthEnterprise, (req, res) => {
   .then((doc) => {
     res.status(201).json({ msg: 'internship post created successfully', data: doc });
   })
+  .catch(doc => {
+    res.status(404).json({ msg:  })
+  })
 });
 
 
@@ -73,11 +76,13 @@ router.post('/internship', AuthEnterprise, (req, res) => {
 router.put('/internship/:id', AuthEnterprise, (req, res) => {
   db.doc(`/internship/${req.params.id}`).get()
   .then(doc => {
-    return db.doc(`/internship${req.params.id}`).ref.updat(req.body);
+    const internshipPost = {
+      ...doc.data()
+    }
+    return db.doc(`/internship${req.params.id}`).ref.update(req.body);
   }).then((doc) => {
     res.json({ message: 'document updated successfully!', doc })
   })
-  res.status(200).json({ msg: `internship ${req.params.id} post updated successfully!`, info: req.body });
 });
 
 
@@ -89,6 +94,15 @@ router.delete('/internship/:id', AuthEnterprise, (req, res) => {
   }).catch((err) => {
     res.json(err);
   })
+});
+
+
+router.get('/internship/:id/applied_users', AuthEnterprise, (req, res) => {
+  db.doc(`/internships/${req.params.id}`).get()
+  .then(doc => {
+    let applied_users = doc.data().applied_users;
+    res.json(applied_users)
+  }).catch(err => res.json({ err }))
 });
 
 
@@ -130,7 +144,7 @@ router.post('/internship/:id/like', AuthUser, (req, res) => {
       })
       .then(() => {
         console.log(' the intern ship data after updated...')
-        return res.json(internshipData);
+        return res.json({ msg: 'Likes Sucessfully...' });
       });
       } else {
       console.log('internship already existd...')
@@ -145,10 +159,30 @@ router.post('/internship/:id/like', AuthUser, (req, res) => {
 
 // comment on a posted internship
 router.post('/internship/:internship_id/comment', (req, res) => {
+  req.json({ msg: 'in Development...' })
 });
 
 // applying on a posted internship
-router.post('/internship/:internship_id/apply', (req, res) => {
+router.get('/internship/:internship_id/apply', AuthUser, (req, res) => {
+  db.doc(`/internships/${req.params.internship_id}`).get()
+  .then(doc => {
+    let applied_users = Object.values(doc.data().applied_users);
+    applied_users.forEach(user => {
+      console.log(user)
+    })
+    if(applied_users.indexOf(req.handle) == -1) {
+      applied_users.push(req.handle);
+      const internshipPost = {
+        ...doc.data(),
+        applied_users: applied_users
+      }
+      db.doc(`/internships/${req.params.internship_id}`).ref().update(internshipPost);
+      res.status(201).json({ message: 'Sucessfully Applied to the Internsihp...' })
+    } else {
+      res.send(400).json({ message: 'User Has Already Applied' });
+    }
+    // res.json(applied_users)
+  }).catch(err => res.json({ err }))
 });
 
 

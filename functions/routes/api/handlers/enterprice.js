@@ -26,7 +26,7 @@ router.get('/internship/:internship_id/get_applied_users', (req, res) => {
 })
 
 router.post('/internship/:internship_id/accept_user/:uid', (req, res) => {
-  res.json({ msg: `accepting ${req.params.uid} for position ${req.params.internship_id}internship` });
+  res.json({ msg: `this is in development....accepting ${req.params.uid} for position ${req.params.internship_id}internship` });
 })
 
 module.exports = router

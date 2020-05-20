@@ -3,13 +3,28 @@ const router = express.Router()
 const { AuthUser } = require('../../../utils/authGuard')
 const { db } = require('../../../utils/admin')
 
+
+router.get('/', (req, res) => {
+  db.collection('users').get()
+  .then(snapshots => {
+    const users = [];
+    snapshots.forEach((doc) => {
+      users.push(doc.data());
+    })
+    return res.json(users);
+  }).catch(err => {
+    res.json(err);
+  })
+})
+
 // USER
 // getting user details
-router.get('/:uid', (req, res) => {
-  db.collection('users').get()
-  .then(doc => {
-    console.log(doc)
+router.get('/:uid', AuthUser, (req, res) => {
+  db.doc(`/users/${req.params.uid}`).get()
+  .then(user => {
+    res.json(user.data())
   })
+  .catch(err => res.json(err))
 });
 
 router.put('/:uid/updateInfo', (req, res) => {
