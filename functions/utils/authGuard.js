@@ -1,15 +1,18 @@
 const { admin, db } = require('./admin')
 
 module.exports.AuthUser = (req, res, next) => {
-  let idtoken = null;
-  if(req.headers.authorization) {
-    idtoken = req.headers.authorization;
+  let idToken;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer ')
+  ) {
+    idToken = req.headers.authorization.split('Bearer ')[1];
   } else {
-    res.status(404).json({ error: 'Unauthorized!' });
+    return res.status(403).json({ error: 'Unauthorized' });
   }
 
   admin.auth()
-  .verifyIdToken(idtoken)
+  .verifyIdToken(idToken)
   .then((decodedToken) => {
     req.user = decodedToken;
     if(req.user.userType == 'user')
@@ -19,27 +22,29 @@ module.exports.AuthUser = (req, res, next) => {
   }).then(data => {
     req.handle = data.docs[0].data().handle
     return next();
-  }).catch(error => res.json(error))
+  }).catch(error => res.json({ error: error.message }))
 }
 
 module.exports.AuthEnterprise = (req, res, next) => {
-  let idtoken = null;
-  if(req.headers.authorization) {
-    idtoken = req.headers.authorization;
+  let idToken;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer ')
+  ) {
+    idToken = req.headers.authorization.split('Bearer ')[1];
   } else {
-    res.status(404).json({ error: 'Unauthorized!' });
+    return res.status(403).json({ error: 'Unauthorized' });
   }
-
   admin.auth()
-  .verifyIdToken(idtoken)
+  .verifyIdToken(idToken)
   .then((decodedToken) => {
     req.user = decodedToken;
     if(req.user.userType == 'enterprise')
-      return db.collection('enterprise').where('enterpriseId', '==', req.user.uid).limit(1).get()
+      return db.collection('enterprises').where('enterpriseId', '==', req.user.uid).limit(1).get()
     else
       return res.json({ error: 'auth forbidden for users... only enterprises can request...' });
   }).then(data => {
     req.handle = data.docs[0].data().handle
     return next();
-  }).catch(error => res.json('Some thing went wrong!!!'))
+  }).catch(error => res.json({ error: error.message }))
 }

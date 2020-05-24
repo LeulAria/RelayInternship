@@ -11,20 +11,25 @@ router.get("/", (req, res) => {
 router.post("/signup_user", (req, res) => {
   const defaultAvatar = "defaut_avatar.png";
 
+  if(!req.body.handle.includes('@rlu-')) {
+    res.status(400).json({ error: 'WTF Pease use @rlu- in front of usernames/handles for users...' })
+  }
+
+  if(req.body.password !== req.body.confirmPassword) {
+    res.status(400).json({ error: 'Password must match...' })
+  }
+
   const newUser = {
     // userId: fb-assigned...
     firstname: req.body.firstname,
     lastname: req.body.lastname,
     email: req.body.email,
-    password: req.body.password,
-    confirmPassword: req.body.confirmPassword,
     handle: req.body.handle,
     gender: req.body.gender,
     dob: req.body.dob,
     eduction: req.body.eduction,
     major: req.body.major,
     nationality: req.body.nationality,
-    // social_media_accounts: 'string/link', optional
     address: req.body.address,
     current_work: req.body.current_work,
     experince: req.body.experince,
@@ -33,7 +38,7 @@ router.post("/signup_user", (req, res) => {
     avatarImg: `https://firebasestorage.googleapis.com/v0/b/${FBconfig.storageBucket}/o/${defaultAvatar}?alt=media`,
   };
 
-  let token, userId;
+  let token, userId, user;
   db.doc(`/users/${newUser.username}`)
     .get()
     .then((doc) => {
@@ -44,11 +49,12 @@ router.post("/signup_user", (req, res) => {
       } else {
         return firebase
           .auth()
-          .createUserWithEmailAndPassword(newUser.email, newUser.password);
+          .createUserWithEmailAndPassword(newUser.email, req.body.password);
       }
     })
     .then((credentials) => {
       userId = credentials.user.uid;
+      user = credentials.user;
       return credentials.user.getIdToken();
     })
     .then((credToken) => {
@@ -62,21 +68,41 @@ router.post("/signup_user", (req, res) => {
       return db.doc(`/users/${newUser.handle}`).set(newUser);
     })
     .then(() => {
-      res.status(201).json({ token });
+      return user.updateProfile({
+        displayName: newUser.handle
+      })
+    })
+    .then(() => {
+      res.status(201).json({ 
+        token,
+        userInfo: {
+          fullname: newUser.firstname+' '+newUser.lastname,
+          username: newUser.handle,
+          email: newUser.email,
+          avatarImg: newUser.avatarImg
+        }
+      });
     })
     .catch((error) => {
       console.log(error);
-      res.status(400).json({ error: error });
+      res.status(400).json({ error: error.message });
     });
 });
 
 router.post("/signup_enterprise", (req, res) => {
   const defaultAvatar = "enterprice-default-avatar.png";
 
+  if(!req.body.handle.includes('@rle-')) {
+    res.status(400).json({ error: 'Pease use @rle- symbols in front of usernames/handles for enterprises...' })
+  }
+
+  if(req.body.password !== req.body.confirmPassword) {
+    res.status(400).json({ error: 'Password must match...' })
+  }
+
   const newEnterprise = {
     enterprise_name: req.body.enterprise_name,
     email: req.body.email,
-    password: req.body.password,
     handle: req.body.handle,
     enterprise_type: req.body.enterprise_type,
     address: req.body.address,
@@ -89,7 +115,7 @@ router.post("/signup_enterprise", (req, res) => {
     avatarImg: `https://firebasestorage.googleapis.com/v0/b/${FBconfig.storageBucket}/o/${defaultAvatar}?alt=media`,
   };
 
-  let token, enterpriseId;
+  let token, enterpriseId, enterprise;
   db.doc(`/enterprises/${newEnterprise.username}`)
     .get()
     .then((doc) => {
@@ -100,11 +126,15 @@ router.post("/signup_enterprise", (req, res) => {
       } else {
         return firebase
           .auth()
-          .createUserWithEmailAndPassword(newEnterprise.email, newEnterprise.password);
+          .createUserWithEmailAndPassword(
+            newEnterprise.email,
+            req.body.password
+          );
       }
     })
     .then((credentials) => {
       enterpriseId = credentials.user.uid;
+      enterprise = credentials.user;
       return credentials.user.getIdToken();
     })
     .then((credToken) => {
@@ -115,14 +145,27 @@ router.post("/signup_enterprise", (req, res) => {
       });
     })
     .then(() => {
-      return db.doc(`/enterprise/${newEnterprise.handle}`).set(newEnterprise);
+      return db.doc(`/enterprises/${newEnterprise.handle}`).set(newEnterprise);
     })
     .then(() => {
-      res.status(201).json({ token });
+      return enterprise.updateProfile({
+        displayName: newEnterprise.handle
+      })
+    })
+    .then(() => {
+      res.status(201).json({
+        token,
+        userInfo: {
+          fullname: newEnterprise.enterprise_name,
+          username: newEnterprise.handle,
+          email: newEnterprise.email,
+          avatarImg: newEnterprise.avatarImg
+        }
+      });
     })
     .catch((error) => {
       console.log(error);
-      res.status(400).json({ error: error });
+      res.status(400).json({ error: error.message });
     });
 });
 

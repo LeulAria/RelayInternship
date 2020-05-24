@@ -48,26 +48,29 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, { explorer: true 
  */
 app.get("/", (req, res) => {
   res.send(
-    `<h1 style="font-size:6vw;text-align:center;font-family:monospace;padding:6vw;
-    box-shadow:0 0 10px 4px rgba(0,0,0,0.2);border-radius:2vw;margin:10%;">/RelayInternships API<p>/doc   to see the documentation</p><h1>`
+    `<div style="width:100vw;height:100vh;position:absolute;top:0;left:0;overflow:hidden;
+    background:#111;color:#fff;display:flex;">
+      <h1 style="margin: auto;font-family:ubuntu,monospace;font-weight:700;
+      font-size:6vh;letter-spacing:2px;text-shadow:0 0 15px #fff7">RelayInternships API</h1>   
+    </div>
+    `
   );
 })
+      
 
 // AUTHENTICATIONS
 // Signing into application
 app.use("/signup", require("./routes/api/auth/signup"))
 // Loging into application
 app.use("/login", require("./routes/api/auth/login"))
-
+// Logging out of the application
+app.use('/logout', require("./routes/api/auth/logout"))
 
 // POSTS
 // Internship posts
 app.use("/posts", require('./routes/api/posts/posts'))
 
 // USER HANDLERS
-app.use('/user', require('./routes/api/handlers/user'))
-
-// ENTERPRICE HANDLERS
-app.use('/enterprice', require('./routes/api/handlers/enterprice'))
+app.use('/users', require('./routes/api/handlers/users'))
 
 exports.api = functions.region("europe-west1").https.onRequest(app);
