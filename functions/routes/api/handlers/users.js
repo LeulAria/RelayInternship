@@ -38,20 +38,17 @@ router.get('/', (req, res) => {
 
 router.get('/user/:id', (req, res) => {
   let data;
-  console.log(req.params.id)
-  console.log('the output comparing it with @rlu-', req.params.id.includes('@rlu-') )
-  console.log('the output comparing it with @rle-', req.params.id.includes('@rle-') )
   if(req.params.id.includes('@rle-')) {
     db.doc(`/enterprises/${req.params.id}`).get()
     .then(doc => {
-      res.json(doc.data())
+      res.json({ userInfo: doc.data(), isUser: true })
     })
     .catch((error) => res.status(404).json({ error: error.message }))
   } else if(req.params.id.includes('@rlu-')) {
     console.log('the user data... ')
     db.doc(`/users/${req.params.id}`).get()
     .then((doc) => {
-      res.json(doc.data())
+      res.json({ userInfo: doc.data(), isCompany: true })
     })
     .catch((error) => res.status(404).json({ error: error.message }))
   } else {

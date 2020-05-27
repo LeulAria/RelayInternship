@@ -92,11 +92,25 @@ router.put('/internship/:id', AuthEnterprise, (req, res) => {
 
 // delete a posted internship
 router.delete('/internship/:id', AuthEnterprise, (req, res) => {
-  db.doc(`/internships/${req.params.id}`).delete()
+
+  db.doc(`/internships/${req.params.id}`).get()
   .then((doc) => {
-    res.json({ message: 'internship post deleted successfully!' });
-  }).catch((err) => {
-    res.json(err);
+    console.log('exists: ', doc.exists)
+    if(doc.exists) {
+      if(doc.data().enterprice_handle == req.handle) {
+        return db.doc(`/internships/${req.params.id}`).delete()
+      } else {
+        res.status(403).json({ error: 'this enterprise is Unauthorized to delete this post!' })
+      }
+    } else {
+      res.status(400).json({ error: 'internship post not found!' });
+    }
+  })
+  .then(() => {
+    res.status(200).json({ message: 'internship post deleted successfully!' });
+  })
+  .catch((err) => {
+    res.status(404).json({ error: err.message });
   })
 });
 
@@ -215,7 +229,8 @@ router.post('/internship/:internship_id/comment', (req, res) => {
 router.post('/internship/:internship_id/apply', AuthUser, (req, res) => {
   db.doc(`/internships/${req.params.internship_id}`).get()
   .then(doc => {
-    let applied_users = Object.values(doc.data().applied_users);
+    let internshipData = doc.data();
+    let applied_users = doc.data().applied_users;
     console.log('applied users: ', applied_users)
     const found = applied_users.some(el => el.username === req.handle);
 
@@ -229,9 +244,10 @@ router.post('/internship/:internship_id/apply', AuthUser, (req, res) => {
         }
         applied_users.push(user);
         const internshipPost = {
-          ...doc.data(),
+          ...internshipData,
           applied_users: applied_users
         }
+        console.log(internshipPost);
         db.doc(`/internships/${req.params.internship_id}`).update(internshipPost)
         .then(() => {
           res.status(201).json({ message: 'Sucessfully Applied to the Internsihp...' })

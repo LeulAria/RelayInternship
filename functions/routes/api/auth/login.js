@@ -40,7 +40,7 @@ router.post('/', (req, res) => {
     password: req.body.password
   }
 
-  let token, user, userInfo;
+  let token, user, userInfo, userType;
   firebase.auth()
   .signInWithEmailAndPassword(loginData.email, loginData.password)
   .then(credentials => {
@@ -51,9 +51,11 @@ router.post('/', (req, res) => {
     token = idtoken;
     if(user.displayName.includes('@rlu-')) {
       console.log('it is a user-----------')
+      userType = 'u';
       return db.doc(`/users/${user.displayName}`).get()
     }
     else if(user.displayName.includes('@rle-')) {
+      userType = 'e'
       return db.doc(`/enterprises/${user.displayName}`).get()
     }
     else {
@@ -68,7 +70,9 @@ router.post('/', (req, res) => {
       username: user.handle,
       fullname: fullname || user.enterprise_name,
       email:  user.email,
-      avatarImg: user.avatarImg
+      avatarImg: user.avatarImg,
+      isUser: userType=='u'?true:undefined,
+      isCampany: userType=='e'?true:undefined
     }
     res.json({ token, userInfo })
   })

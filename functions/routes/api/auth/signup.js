@@ -80,7 +80,8 @@ router.post("/signup_user", (req, res) => {
           username: newUser.handle,
           email: newUser.email,
           avatarImg: newUser.avatarImg
-        }
+        },
+        isUser: true
       });
     })
     .catch((error) => {
@@ -160,7 +161,8 @@ router.post("/signup_enterprise", (req, res) => {
           username: newEnterprise.handle,
           email: newEnterprise.email,
           avatarImg: newEnterprise.avatarImg
-        }
+        },
+        isCompany: true
       });
     })
     .catch((error) => {
