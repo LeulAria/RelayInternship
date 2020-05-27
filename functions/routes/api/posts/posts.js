@@ -8,7 +8,6 @@ router.get('/', (req, res) => {
   res.send('posts api').end();
 });
 
-
 // internship posts CRUD
 router.get('/internships', (req, res) => {
   db.collection('internships').get()
@@ -31,7 +30,7 @@ router.get('/internship/:id', (req, res) => {
     if(snapshot.exists) {
       res.json(snapshot.data())
     } else {
-      res.json({ error: "document doesn't exist" })
+      res.json({ error: "Document doesn't exist" })
     }
   }).catch(err => {
     console.error(err);
@@ -65,9 +64,9 @@ router.post('/internship', AuthEnterprise, (req, res) => {
   db.doc(`/internships/${newInternshipPost.id}`).set(newInternshipPost)
   .then((doc) => {
     db.doc(`/internships/${newInternshipPost.id}`).get().then((doc) => {
-      res.status(201).json({ msg: 'internship post created successfully', internshipData: doc.data() });
+      res.status(201).json({ msg: 'Internship post created successfully', internshipData: doc.data() });
     }).catch((error) => {
-      res.status(400).json({ msg: 'internship data was created but was unable to fetch it...' })
+      res.status(400).json({ msg: 'Internship data was created but was unable to fetch it...' })
     })
   })
   .catch(error => {
@@ -85,29 +84,27 @@ router.put('/internship/:id', AuthEnterprise, (req, res) => {
     }
     return db.doc(`/internship${req.params.id}`).ref.update(req.body);
   }).then((doc) => {
-    res.json({ message: 'document updated successfully!', doc })
+    res.json({ message: 'Document updated successfully!', doc })
   })
 });
 
 
 // delete a posted internship
 router.delete('/internship/:id', AuthEnterprise, (req, res) => {
-
   db.doc(`/internships/${req.params.id}`).get()
   .then((doc) => {
-    console.log('exists: ', doc.exists)
     if(doc.exists) {
       if(doc.data().enterprice_handle == req.handle) {
         return db.doc(`/internships/${req.params.id}`).delete()
       } else {
-        res.status(403).json({ error: 'this enterprise is Unauthorized to delete this post!' })
+        res.status(403).json({ error: 'This enterprise is Unauthorized to delete this post!' })
       }
     } else {
-      res.status(400).json({ error: 'internship post not found!' });
+      res.status(400).json({ error: 'Internship post not found!' });
     }
   })
   .then(() => {
-    res.status(200).json({ message: 'internship post deleted successfully!' });
+    res.status(200).json({ message: 'Internship post deleted successfully!' });
   })
   .catch((err) => {
     res.status(404).json({ error: err.message });
@@ -117,18 +114,46 @@ router.delete('/internship/:id', AuthEnterprise, (req, res) => {
 
 router.get('/internship/:id/applied_users', AuthEnterprise, (req, res) => {
   db.doc(`/internships/${req.params.id}`).get()
-  .then(doc => {
+  .then((doc) => {
+    if(doc.exists) {
+      if(doc.data().enterprice_handle == req.handle) {
+        return db.doc(`/internships/${req.params.id}`).get()
+      } else {
+        res.status(403).json({ error: 'This enterprise is Unauthorized to see this post!' })
+      }
+    } else {
+      res.status(400).json({ error: 'Internship post not found!' });
+    }
+  })
+  .then((doc) => {
     let applied_users = doc.data().applied_users;
-    res.json(applied_users)
-  }).catch(err => res.json({ error: error.message }))
+    res.json(applied_users)  
+  })
+  .catch((err) => {
+    res.status(404).json({ error: err.message });
+  })
 });
 
 router.get('/internship/:id/accepted_users', AuthEnterprise, (req, res) => {
   db.doc(`/internships/${req.params.id}`).get()
-  .then(doc => {
+  .then((doc) => {
+    if(doc.exists) {
+      if(doc.data().enterprice_handle == req.handle) {
+        return db.doc(`/internships/${req.params.id}`).get()
+      } else {
+        res.status(403).json({ error: 'This enterprise is Unauthorized to see this post!' })
+      }
+    } else {
+      res.status(400).json({ error: 'Internship post not found!' });
+    }
+  })
+  .then((doc) => {
     let accepted_users = doc.data().accepted_users;
     res.json(accepted_users)
-  }).catch(err => res.json({ error: error.message }))
+  })
+  .catch((err) => {
+    res.status(404).json({ error: err.message });
+  })
 });
 
 
@@ -138,29 +163,33 @@ router.post('/internship/:internship_id/accept/:uid', AuthEnterprise, (req, res)
   db.doc(`/internships/${req.params.internship_id}`)
   .get()
   .then(doc => {
-    if(doc.exists) {  
-      internshipData = doc.data();
-      internshipId = doc.id;
-      const applied_users = internshipData.applied_users 
-      const accepted_users = internshipData.accepted_users
+    if(doc.exists) {
+      if(doc.data().enterprice_handle == req.handle) {
+        internshipData = doc.data();
+        internshipId = doc.id;
+        const applied_users = internshipData.applied_users 
+        const accepted_users = internshipData.accepted_users
 
-      const user = applied_users.filter(user => user.username == username)[0]
-      const userfound = accepted_users.some(e => e.username == user.username)
-      if(!userfound) {
-        accepted_users.push(user);
-        const internshipPost = {
-          ...internshipData,
-          accepted_users: accepted_users
+        const user = applied_users.filter(user => user.username == username)[0]
+        const userfound = accepted_users.some(e => e.username == user.username)
+        if(!userfound) {
+          accepted_users.push(user);
+          const internshipPost = {
+            ...internshipData,
+            accepted_users: accepted_users
+          }
+          db.doc(`/internships/${req.params.internship_id}`).update(internshipPost)
+          .then(() => {
+            res.status(201).json({ message: `${user.fullname} has been Sucesfully accepted!` })
+          }).catch((error) => {
+            res.status(400).json({ error: error.message })
+          })
+        }else {
+          res.json({ message: 'User has been already accepted' })
         }
-        db.doc(`/internships/${req.params.internship_id}`).update(internshipPost)
-        .then(() => {
-          console.log('user', user)
-          res.status(201).json({ message: `you have accepted ${user.fullname}` })
-        }).catch((error) => {
-          res.status(400).json({ error: error.message })
-        })
-      }else {
-        res.json({ message: 'user is already accepted' })
+      }
+      else {
+        res.json({ error: 'This enterprice is unauthorized for this internship post actions!' })
       }
     } else {
       return res.status(404).json({ error: 'Internship Post not found!' });
@@ -169,6 +198,24 @@ router.post('/internship/:internship_id/accept/:uid', AuthEnterprise, (req, res)
   .catch((error) => {
     res.status(400).json({ error })
   })
+})
+
+
+router.get('/internship/:id/comments', (req, res) => {
+  db.doc(`/internships/${req.params.id}`).get()
+  .then((doc) => {
+    if(doc.exists) {
+      return db.collection('comments').where('internshipId', '==', req.params.id).get()
+    } else {
+      res.status(404).json({ error: 'Internship Post Not Foud!' })
+    }
+  })
+  .then((docs) => {
+    const comments = docs.docs.map(doc => doc.data())
+    console.log(comments);
+    res.json({ comments })
+  })
+  .catch((err) => res.status(400).json({ error: err.message }))
 })
 
 
@@ -183,7 +230,6 @@ router.post('/internship/:id/like', AuthUser, (req, res) => {
     if(doc.exists) {
       internshipData = doc.data();
       internshipId = doc.id;
-      console.log('getted the internships data: ', doc.data())
       return db
         .collection('likes')
         .where('userId', '==', req.handle)
@@ -209,11 +255,9 @@ router.post('/internship/:id/like', AuthUser, (req, res) => {
         return db.doc(`/internships/${req.params.id}`).update({ likes: internshipData.likes });
       })
       .then(() => {
-        console.log(' the intern ship data after updated...')
-        return res.json({ msg: 'Likes Sucessfully...' });
+        return res.json({ msg: 'Liked Sucessfully...' });
       });
-      } else {
-      console.log('internship already existd...')
+    } else {
       return res.status(400).json({ error: 'Internship Post already Liked...' });
     }
   })
@@ -221,8 +265,43 @@ router.post('/internship/:id/like', AuthUser, (req, res) => {
 
 
 // comment on a posted internship
-router.post('/internship/:internship_id/comment', (req, res) => {
-  req.json({ msg: 'in Development...' })
+router.post('/internship/:id/comment', AuthUser, (req, res) => {
+  const newComment = {
+    internshipId: req.params.id,
+    userId: req.handle,
+    comment: req.body.comment,
+    created_at: new Date().toISOString() 
+  }
+
+  let internship;
+  db.doc(`/internships/${req.params.id}`).get()
+  .then(doc => {
+    if(doc.exists) {
+      internship = doc.data()
+      return db.collection('comments').where('internshipId', '==', newComment.internshipId)
+      .where('userId', '==', newComment.userId).limit(1).get()
+    } else {
+      res.status(404).json({ error: 'Internship not found!' });
+    }
+  })
+  .then((doc) => {
+    if(!doc.exists) {
+      console.log('you haven\'t commened')
+      console.log('adding to data base th comments...')
+      return db.collection('comments').add(newComment);
+    } else {
+      console.log('you have commented: ', doc.data())
+      res.status(400).json({ message: 'You have commented Already' })
+    }
+  })
+  .then(() => {
+    console.log('the comment added successfully')
+    return db.doc(`/internships/${req.params.id}`).update({ commentCount: ++internship.commentCount })
+  })
+  .then(() => {
+    res.status(201).json({ message: 'The Comment has been saved sucessfully!' });
+  })
+  .catch((err) => res.status(400).json({ error: err.message }))
 });
 
 // applying on a posted internship
@@ -247,7 +326,6 @@ router.post('/internship/:internship_id/apply', AuthUser, (req, res) => {
           ...internshipData,
           applied_users: applied_users
         }
-        console.log(internshipPost);
         db.doc(`/internships/${req.params.internship_id}`).update(internshipPost)
         .then(() => {
           res.status(201).json({ message: 'Sucessfully Applied to the Internsihp...' })
