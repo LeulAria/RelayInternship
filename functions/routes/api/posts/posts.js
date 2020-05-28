@@ -112,6 +112,7 @@ router.delete('/internship/:id', AuthEnterprise, (req, res) => {
 });
 
 
+// Get applied Users
 router.get('/internship/:id/applied_users', AuthEnterprise, (req, res) => {
   db.doc(`/internships/${req.params.id}`).get()
   .then((doc) => {
@@ -134,6 +135,7 @@ router.get('/internship/:id/applied_users', AuthEnterprise, (req, res) => {
   })
 });
 
+// Get Acepted Users
 router.get('/internship/:id/accepted_users', AuthEnterprise, (req, res) => {
   db.doc(`/internships/${req.params.id}`).get()
   .then((doc) => {
@@ -156,7 +158,7 @@ router.get('/internship/:id/accepted_users', AuthEnterprise, (req, res) => {
   })
 });
 
-
+// Accept certain user...
 router.post('/internship/:internship_id/accept/:uid', AuthEnterprise, (req, res) => {
   let internshipData, internshipId;
   const username = req.params.uid;
@@ -201,6 +203,7 @@ router.post('/internship/:internship_id/accept/:uid', AuthEnterprise, (req, res)
 })
 
 
+// Get internship post comments...
 router.get('/internship/:id/comments', (req, res) => {
   db.doc(`/internships/${req.params.id}`).get()
   .then((doc) => {
@@ -217,6 +220,19 @@ router.get('/internship/:id/comments', (req, res) => {
   })
   .catch((err) => res.status(400).json({ error: err.message }))
 })
+
+// Reply to comments...
+router.get('/internship/:internship_id/:comment_id', (req, res) => {
+
+})
+
+
+
+
+
+
+
+
 
 
 //USER ACTIONS ON POSTED INTERNSHIPS 
@@ -303,6 +319,39 @@ router.post('/internship/:id/comment', AuthUser, (req, res) => {
   })
   .catch((err) => res.status(400).json({ error: err.message }))
 });
+
+
+// reply to internship post comments...
+router.post('/internship/:internship_id/:comment_id/replay', AuthUser, (req, res) => {
+  const newReplay = {
+    internshipId: req.params.internship_id,
+    commentId: req.params.comment_id,
+    userId: req.handle,
+    reply_comment: req.body.reply_comment,
+    createdAt: new Date().toISOString
+  }
+
+  db.doc(`/internships/${req.param.internship_id}`).get()
+  .then((doc) => {
+    if(doc.exists) {
+      return db.doc(`/comments/${req.body.comment_id}`).get()
+    } else {
+      res.status(404).json({ error: 'Internship post not found!' })
+    }
+  })
+  .then((doc) => {
+    if(doc.exists) {
+      return db.collection('comment_replays').add(newReplay)
+    } else {
+      res.status(404).json({ error: 'Comment post not found!' })
+    }
+  }) 
+  .then(() => {
+    res.status(201).json({ message: 'Reply to comment successfully saved' })
+  })
+  .catch((err) => res.status(400).json({ error: err.message }))
+})
+
 
 // applying on a posted internship
 router.post('/internship/:internship_id/apply', AuthUser, (req, res) => {

@@ -1,8 +1,13 @@
+const os = require('os')
+const fs = require('fs')
+const path = require('path')
 const express = require('express')
 const router = express.Router();
 const firebase = require('firebase')
+const uuid = require('uuid')
 const { db, admin } = require('../../../utils/admin')
 const { AuthUser, AuthEnterprise }  = require('../../../utils/authGuard')
+const fbConfig = require('../../../utils/FBConfig')
 
 router.get('/', (req, res) => {
   const users = { users: [], enterprises: [] }
@@ -95,7 +100,7 @@ router.delete('/user', AuthUser, (req, res) => {
     res.status(400).json({ error: error })
   });
 })
-
+// delete account for enterprises
 router.delete('/enterprise', AuthEnterprise, (req, res) => {
   var user = firebase.auth().currentUser;
   
@@ -110,7 +115,7 @@ router.delete('/enterprise', AuthEnterprise, (req, res) => {
   });
 })
 
-
+// send email verificatio to users to verify thei'r email
 router.post('/verify_email', (req, res) => {
   var user = firebase.auth().currentUser;
   
@@ -122,13 +127,87 @@ router.post('/verify_email', (req, res) => {
       res.send(400).json({ error: error })
     });
   } else {
-    res.send(400).json({ error: 'unauthorized... verification token...' })
+    res.send(403).json({ error: 'Unauthorized!' })
   }
 })
 
+// checking if the email is verified or not...
 router.get('/is_verified', (req, res) => {
   const verified = firebase.auth().currentUser.emailVerified;
   res.json({ email_verified: verified })
 })
+
+
+// users uploading/updating their profile pic
+router.post('/user/avatar', AuthUser, (req, res) => {
+  const BusBoy = require('busboy');
+  const busboy = new BusBoy({ headers: req.headers });
+
+  let imageToBeUploaded = {};
+  let imageFileName;
+
+  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+    console.log(fieldname, file, filename, encoding, mimetype);
+    if (mimetype !== 'image/jpeg' && mimetype !== 'image/png' && mimetype !== 'image/jpg') {
+      return res.status(400).json({ error: 'Wrong file type submitted' });
+    }
+
+    // my.image.png => ['my', 'image', 'png']
+    const imageExtension = filename.split('.')[filename.split('.').length - 1];
+    // 32756238461724837.png
+    imageFileName = `${uuid.v4()}.${imageExtension}`;
+    const filepath = path.join(os.tmpdir(), imageFileName);
+    imageToBeUploaded = { filepath, mimetype };
+    file.pipe(fs.createWriteStream(filepath));
+  });
+
+  busboy.on('finish', () => {
+    admin
+      .storage()
+      .bucket(`${fbConfig.storageBucket}`)
+      .upload(imageToBeUploaded.filepath, {
+        resumable: false,
+        metadata: {
+          metadata: {
+            contentType: imageToBeUploaded.mimetype
+          }
+        }
+      })
+      .then(() => {
+        const avatarImg = `https://firebasestorage.googleapis.com/v0/b/${fbConfig.storageBucket}/o/${imageFileName}?alt=media`;
+        return db.doc(`/users/${req.handle}`).update({ avatarImg });
+      })
+      .then(() => {
+        return res.json({ message: 'image uploaded successfully' });
+      })
+      .catch((err) => {
+        console.error(err);
+        return res.status(500).json({ error: err.message });
+      });
+  });
+  busboy.end(req.rawBody);
+})
+
+
+
+
+
+
+
+
+// users uploading/updating their profile pic
+router.post('/enterprise/avatar', AuthEnterprise, (req, res) => {
+
+})
+
+// users uploaing pdf version of their resume
+router.post('/resume', AuthUser,  (req, res) => {
+
+})
+
+// sening viwable pdf file to the request
+router.get(('/:id/resume', (req, res) => {
+
+}))
 
 module.exports = router
