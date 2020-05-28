@@ -189,15 +189,54 @@ router.post('/user/avatar', AuthUser, (req, res) => {
 })
 
 
-
-
-
-
-
-
-// users uploading/updating their profile pic
+// enterprises uploading/updating their profile pic
 router.post('/enterprise/avatar', AuthEnterprise, (req, res) => {
+  const BusBoy = require('busboy');
+  const busboy = new BusBoy({ headers: req.headers });
 
+  let imageToBeUploaded = {};
+  let imageFileName;
+
+  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+    console.log(fieldname, file, filename, encoding, mimetype);
+    if (mimetype !== 'image/jpeg' && mimetype !== 'image/png' && mimetype !== 'image/jpg') {
+      return res.status(400).json({ error: 'Wrong file type submitted' });
+    }
+
+    // my.image.png => ['my', 'image', 'png']
+    const imageExtension = filename.split('.')[filename.split('.').length - 1];
+    // 32756238461724837.png
+    imageFileName = `${uuid.v4()}.${imageExtension}`;
+    const filepath = path.join(os.tmpdir(), imageFileName);
+    imageToBeUploaded = { filepath, mimetype };
+    file.pipe(fs.createWriteStream(filepath));
+  });
+
+  busboy.on('finish', () => {
+    admin
+      .storage()
+      .bucket(`${fbConfig.storageBucket}`)
+      .upload(imageToBeUploaded.filepath, {
+        resumable: false,
+        metadata: {
+          metadata: {
+            contentType: imageToBeUploaded.mimetype
+          }
+        }
+      })
+      .then(() => {
+        const avatarImg = `https://firebasestorage.googleapis.com/v0/b/${fbConfig.storageBucket}/o/${imageFileName}?alt=media`;
+        return db.doc(`/enterprises/${req.handle}`).update({ avatarImg });
+      })
+      .then(() => {
+        return res.json({ message: 'image uploaded successfully' });
+      })
+      .catch((err) => {
+        console.error(err);
+        return res.status(500).json({ error: err.message });
+      });
+  });
+  busboy.end(req.rawBody);
 })
 
 // users uploaing pdf version of their resume
