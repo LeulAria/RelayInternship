@@ -290,8 +290,30 @@ router.post('/user/resume', AuthUser, (req, res) => {
 })
 
 // sening viwable pdf file to the request
-router.get(('/:id/resume', (req, res) => {
+router.get('/:id/view_resume', (req, res) => {
+  db.doc(`/users/${req.params.id}`).get()
+  .then((doc) => {
+    if(doc.exists) {
+      res.json({ resume_link: doc.data().resume });
+    } else {
+      res.status(404).json({ error: 'User not found!' })
+    }
+  })
+  .catch(() => res.status(500).json())
+})
 
-}))
+// downloading resume pdf file to the request
+router.get('/:id/view_download', (req, res) => {
+  db.doc(`/users/${req.params.id}`).get()
+  .then((doc) => {
+    if(doc.exists) {
+      const resume = doc.data().resume.split('?')[0];
+      res.json({ resume_link: resume });
+    } else {
+      res.status(404).json({ error: 'User not found!' })
+    }
+  })
+  .catch(() => res.status(500).json())
+})
 
 module.exports = router
