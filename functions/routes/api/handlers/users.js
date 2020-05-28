@@ -240,8 +240,53 @@ router.post('/enterprise/avatar', AuthEnterprise, (req, res) => {
 })
 
 // users uploaing pdf version of their resume
-router.post('/resume', AuthUser,  (req, res) => {
+router.post('/user/resume', AuthUser, (req, res) => {
+  const BusBoy = require('busboy');
+  const busboy = new BusBoy({ headers: req.headers });
 
+  let imageToBeUploaded = {};
+  let imageFileName;
+
+  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+    console.log(fieldname, file, filename, encoding, mimetype);
+    if (mimetype !== 'application/pdf') {
+      return res.status(400).json({ error: 'Wrong file type submitted expected pdf file format only!' });
+    }
+
+    // my.image.png => ['my', 'image', 'png']
+    const imageExtension = filename.split('.')[filename.split('.').length - 1];
+    // 32756238461724837.png
+    imageFileName = `${uuid.v4()}.${imageExtension}`;
+    const filepath = path.join(os.tmpdir(), imageFileName);
+    imageToBeUploaded = { filepath, mimetype };
+    file.pipe(fs.createWriteStream(filepath));
+  });
+
+  busboy.on('finish', () => {
+    admin
+      .storage()
+      .bucket(`${fbConfig.storageBucket}`)
+      .upload(imageToBeUploaded.filepath, {
+        resumable: false,
+        metadata: {
+          metadata: {
+            contentType: imageToBeUploaded.mimetype
+          }
+        }
+      })
+      .then(() => {
+        const pdf = `https://firebasestorage.googleapis.com/v0/b/${fbConfig.storageBucket}/o/${imageFileName}?alt=media`;
+        return db.doc(`/users/${req.handle}`).update({ resume: pdf });
+      })
+      .then(() => {
+        return res.json({ message: 'cv/resume has been uploaded successfully' });
+      })
+      .catch((err) => {
+        console.error(err);
+        return res.status(500).json({ error: err.message });
+      });
+  });
+  busboy.end(req.rawBody);
 })
 
 // sening viwable pdf file to the request
